@@ -12,18 +12,14 @@ import SDWebImage
 class PaginationViewController: BaseVC {
 
     @IBOutlet weak var tableView: UITableView!
-    let limit = 5
+    var limit = 5
      var dataArray :[DogCeoModelRes]? = []
-    var recordsArr:[Int] = []
+    var recordsArr:[DogCeoModelRes] = []
+    var isLoading = false
     override func viewDidLoad() {
         super.viewDidLoad()
         
-       var index = 0
-        while index < limit {
-            recordsArr.append(index)
-            index = index + 1
-        }
-        
+       
         self.tableView.tableFooterView = UIView()
         let inQNib = UINib(nibName: "DogCell", bundle: nil)
         self.tableView.register(inQNib, forCellReuseIdentifier: "DogCell")
@@ -31,6 +27,7 @@ class PaginationViewController: BaseVC {
         for item in 1...10 {
            self.callApiForDogCeoListList()
         }
+        
         
     }
     
@@ -45,7 +42,9 @@ class PaginationViewController: BaseVC {
             if success {
                 
                 if response != nil {
+                    
                     self.dataArray?.append(DogCeoModelRes(message: (response!["message"] as! String) ,name: "Bailey",description: "Dogs are often called man's best friend because they fit in with human life. Man refers to humankind and not just guys (Old English). Dogs can serve people in many ways. For example, there are guard dogs, hunting dogs, herding dogs, guide dogs for blind people, and police dogs. There are also dogs that are trained to smell for diseases in the human body or to find bombs or illegal drugs. These dogs sometimes help police in airports or other areas. Sniffer dogs (usually beagles) are sometimes trained for this job. Dogs have even been sent by Russians into outer space, a few years before any human being. The first dog sent up was named Laika, but she died within a few hours." ))
+                    self.isLoading = false
                 }
                 
                 self.tableView.reloadData()
@@ -53,20 +52,6 @@ class PaginationViewController: BaseVC {
             
         }
     }
-    func converStringTOJson(data:String)-> [String:Any] {
-            
-                let dataStr = data.data(using: .utf8)!
-                do {
-                    if let json = try JSONSerialization.jsonObject(with: dataStr, options: []) as? [String: Any] {
-                        return json
-                    }
-                }catch let error as NSError {
-                    print("Failed to load: \(error.localizedDescription)")
-                    return[:]
-                }
-            
-            return [:]
-        }
    
 
 }
@@ -74,7 +59,7 @@ class PaginationViewController: BaseVC {
 extension PaginationViewController : UITableViewDelegate, UITableViewDataSource {
  
  func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return dataArray!.count
+    return dataArray!.count 
     
  }
  
@@ -96,12 +81,27 @@ extension PaginationViewController : UITableViewDelegate, UITableViewDataSource 
     return 180.0
     }
     
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+
+        if !isLoading && indexPath.row == dataArray!.count - 4 {
+                isLoading = true
+                callApiForDogCeoListList()
+            }
+            
+        }
+       
+    
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let vc = BaseVC.vcFactory("Main", SBVC: "DetailViewController") as! DetailViewController
         vc.dict = dataArray
         if let topVCs = UIApplication.topViewController() {
             topVCs.navigationController?.pushViewController(vc, animated: false)
         }
+    }
+    
+  @objc func loadTable(){
+    tableView.reloadData()
     }
 
  }
