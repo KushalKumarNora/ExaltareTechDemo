@@ -1,7 +1,6 @@
 //
 //  PaginationViewController.swift
 //  ExaltaretechDemoTask
-//
 //  Created by kushalkumar nora on 17/10/20.
 //  Copyright © 2020 Demo. All rights reserved.
 //
@@ -13,13 +12,17 @@ import SDWebImage
 class PaginationViewController: BaseVC {
 
     @IBOutlet weak var tableView: UITableView!
-    
+    let limit = 5
      var dataArray :[DogCeoModelRes]? = []
-    
+    var recordsArr:[Int] = []
     override func viewDidLoad() {
         super.viewDidLoad()
         
-       
+       var index = 0
+        while index < limit {
+            recordsArr.append(index)
+            index = index + 1
+        }
         
         self.tableView.tableFooterView = UIView()
         let inQNib = UINib(nibName: "DogCell", bundle: nil)
